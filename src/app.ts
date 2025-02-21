@@ -1,4 +1,4 @@
-import express, { Request, Response, query } from "express";
+import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,6 +12,7 @@ const app = express();
 
 import getAllBooks from "./lib/getAllBooks.ts";
 import searchBooks from "./lib/searchBooks.ts";
+import getBookInfo from "./lib/getBookInfo.ts";
 
 app.get("/api/books/:pageId", async (req: Request, res: Response) => {
   try {
@@ -53,6 +54,15 @@ app.get(
 
 app.get("/api/book/:bookId", async (req: Request, res: Response) => {
   try {
+    const bookId: string = req.params.bookId;
+
+    const result: Object = await getBookInfo(
+      hostGoogleBooks,
+      apiKeyGoogleBooks,
+      bookId
+    );
+
+    res.json(result);
   } catch (error) {
     console.error(error);
   }
