@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, query } from "express";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,18 +11,48 @@ const apiKeyGoogleBooks = process.env.API_KEY_GOOGLE_BOOKS;
 const app = express();
 
 import getAllBooks from "./lib/getAllBooks.ts";
+import searchBooks from "./lib/searchBooks.ts";
 
 app.get("/api/books/:pageId", async (req: Request, res: Response) => {
   try {
     const pageId: number = +req.params.pageId;
 
-    const result = await getAllBooks(
+    const result: Object = await getAllBooks(
       hostGoogleBooks,
       apiKeyGoogleBooks,
       pageId
     );
 
     res.json(result);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+app.get(
+  "/api/books/search/:query/:pageId",
+  async (req: Request, res: Response) => {
+    try {
+      const pageId: number = +req.params.pageId;
+
+      const query: string = req.params.query;
+
+      const result: Object = await searchBooks(
+        hostGoogleBooks,
+        apiKeyGoogleBooks,
+        query,
+        pageId
+      );
+
+      res.json(result);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+app.get("/api/book/:bookId", async (req: Request, res: Response) => {
+  try {
   } catch (error) {
     console.error(error);
   }

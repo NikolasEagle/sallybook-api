@@ -39,8 +39,6 @@ export default async function getAllBooks(
 
   const body: Body = response.data;
 
-  console.log(body.totalItems);
-
   if (body.items) {
     const data = body.items;
 
