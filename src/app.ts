@@ -8,11 +8,14 @@ const port = process.env.PORT || 8080;
 const hostGoogleBooks = process.env.HOST_API_GOOGLE_BOOKS;
 const apiKeyGoogleBooks = process.env.API_KEY_GOOGLE_BOOKS;
 
+const hostLibgen = process.env.HOST_LIBGEN;
+
 const app = express();
 
 import getAllBooks from "./lib/getAllBooks.ts";
 import searchBooks from "./lib/searchBooks.ts";
 import getBookInfo from "./lib/getBookInfo.ts";
+import getPathBookFile from "./lib/getPathBookFile.ts";
 
 app.get("/api/books/:pageId", async (req: Request, res: Response) => {
   try {
@@ -67,6 +70,27 @@ app.get("/api/book/:bookId", async (req: Request, res: Response) => {
     console.error(error);
   }
 });
+
+app.get(
+  "/api/file/:bookTitle/:bookPublisher",
+  async (req: Request, res: Response) => {
+    try {
+      const bookTitle = req.params.bookTitle;
+
+      const bookPublisher = req.params.bookPublisher;
+
+      const result: string | null = await getPathBookFile(
+        hostLibgen,
+        bookTitle,
+        bookPublisher
+      );
+
+      res.send(result);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+);
 
 app.listen(port, () => {
   console.log(`Service is running on http://localhost:${port}`);
