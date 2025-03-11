@@ -22,6 +22,8 @@ interface Books {
   nextPage: number | null;
 }
 
+const maxResults: number = 30;
+
 export default async function searchBooks(
   host: string | undefined,
   key: string | undefined,
@@ -30,19 +32,10 @@ export default async function searchBooks(
 ): Promise<Books> {
   const currentPage: number = pageId;
 
-  const startIndex: number = (currentPage - 1) * 30;
-
-  if (startIndex > 1000) {
-    return {
-      currentPage: currentPage,
-      totalItems: null,
-      data: [],
-      nextPage: null,
-    };
-  }
+  const startIndex: number = (currentPage - 1) * maxResults;
 
   const response: Response = await axios.get(
-    `${host}?key=${key}&q=intitle:${query}&startIndex=${startIndex}&projection=lite&maxResults=30&language=ru-RU`
+    `${host}?key=${key}&q=intitle:${query}&startIndex=${startIndex}&projection=lite&maxResults=${maxResults}&language=ru-RU`
   );
 
   const body: Body = response.data;
@@ -51,10 +44,20 @@ export default async function searchBooks(
 
   const data = body.items;
 
+  const nextPageResponse: Response = await axios.get(
+    `${host}?key=${key}&q=intitle:${query}&startIndex=${
+      startIndex + maxResults
+    }&projection=lite&maxResults=${maxResults}&language=ru-RU`
+  );
+
+  const nextPageBody: Body = nextPageResponse.data;
+
+  const nextPage = nextPageBody.items ? currentPage + 1 : null;
+
   return {
-    currentPage: currentPage,
-    totalItems: data ? totalItems : null,
-    data: data ? data : [],
-    nextPage: totalItems >= startIndex + 30 ? currentPage + 1 : null,
+    currentPage: pageId,
+    totalItems: totalItems,
+    data: data,
+    nextPage: nextPage,
   };
 }
