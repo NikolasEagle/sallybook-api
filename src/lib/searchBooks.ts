@@ -1,63 +1,56 @@
+import checkNextPage, { Links } from "./checkNextPage.ts";
+import convertEntryData, { Entries, Data } from "./convertEntryData.ts";
+
 import axios from "axios";
 
+import { parseStringPromise } from "xml2js";
+
 interface Response {
-  data: Body;
+  data: XMLDocument;
 }
 
 interface Body {
-  kind: string;
-
-  totalItems: number;
-
-  items: Object[] | [];
+  feed: {
+    link: Links;
+    entry: Entries;
+  };
 }
 
 interface Books {
   currentPage: number;
 
-  totalItems: number | null;
-
-  data: Object[] | [];
+  data: Data;
 
   nextPage: number | null;
 }
 
-const maxResults: number = 30;
-
 export default async function searchBooks(
   host: string | undefined,
-  key: string | undefined,
   query: string,
   pageId: number
-): Promise<Books> {
-  const currentPage: number = pageId;
+): Promise<Books | null> {
+  try {
+    const response: Response = await axios.get(
+      pageId === 1
+        ? `${host}/opds/search?searchType=books&searchTerm=${query}`
+        : `${host}/opds/search?searchType=books&searchTerm=${query}&pageNumber=${
+            pageId - 1
+          }`
+    );
 
-  const startIndex: number = (currentPage - 1) * maxResults;
+    const xml: XMLDocument = response.data;
 
-  const response: Response = await axios.get(
-    `${host}?key=${key}&q=intitle:${query}&startIndex=${startIndex}&projection=lite&maxResults=${maxResults}&language=ru-RU`
-  );
+    const body: Body = await parseStringPromise(xml);
 
-  const body: Body = response.data;
+    const currentPage = pageId;
 
-  const totalItems = body.totalItems;
+    const nextPage = checkNextPage(body.feed.link) ? currentPage + 1 : null;
 
-  const data = body.items;
+    const data: Data = convertEntryData(host, body.feed.entry);
 
-  const nextPageResponse: Response = await axios.get(
-    `${host}?key=${key}&q=intitle:${query}&startIndex=${
-      startIndex + maxResults
-    }&projection=lite&maxResults=${maxResults}&language=ru-RU`
-  );
-
-  const nextPageBody: Body = nextPageResponse.data;
-
-  const nextPage = nextPageBody.items ? currentPage + 1 : null;
-
-  return {
-    currentPage: pageId,
-    totalItems: totalItems,
-    data: data,
-    nextPage: nextPage,
-  };
+    return { currentPage: currentPage, data: data, nextPage: nextPage };
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }
