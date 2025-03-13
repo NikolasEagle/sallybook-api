@@ -1,11 +1,19 @@
+import checkNextPage, { Links } from "./checkNextPage.ts";
+import convertEntryData, { Entries, Data } from "./convertEntryData.ts";
+
 import axios from "axios";
 
+import { parseStringPromise } from "xml2js";
+
 interface Response {
-  data: Body;
+  data: XMLDocument;
 }
 
 interface Body {
-  items: Object[] | [];
+  feed: {
+    link: Links;
+    entry: Entries;
+  };
 }
 
 interface Books {
@@ -16,36 +24,28 @@ interface Books {
   nextPage: number | null;
 }
 
-type Data = Object[];
-
-const maxResults: number = 30;
-
 export default async function getAllBooks(
   host: string | undefined,
-  key: string | undefined,
   pageId: number
-): Promise<Books> {
-  const currentPage: number = pageId;
+): Promise<Books | null> {
+  try {
+    const response: Response = await axios.get(
+      `${host}/opds/new/${pageId !== 0 ? pageId - 1 : 0}/new`
+    );
 
-  const startIndex: number = (currentPage - 1) * maxResults;
+    const xml: XMLDocument = response.data;
 
-  const response: Response = await axios.get(
-    `${host}?key=${key}&q=intitle:&startIndex=${startIndex}&projection=lite&maxResults=${maxResults}&language=ru-RU`
-  );
+    const body: Body = await parseStringPromise(xml);
 
-  const body: Body = response.data;
+    const currentPage = pageId;
 
-  const data = body.items;
+    const nextPage = checkNextPage(body.feed.link) ? currentPage + 1 : null;
 
-  const nextPageResponse: Response = await axios.get(
-    `${host}?key=${key}&q=intitle:&startIndex=${
-      startIndex + maxResults
-    }&projection=lite&maxResults=${maxResults}&language=ru-RU`
-  );
+    const data: Data = convertEntryData(host, body.feed.entry);
 
-  const nextPageBody: Body = nextPageResponse.data;
-
-  const nextPage = nextPageBody.items ? currentPage + 1 : null;
-
-  return { currentPage: pageId, data: data, nextPage: nextPage };
+    return { currentPage: currentPage, data: data, nextPage: nextPage };
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }

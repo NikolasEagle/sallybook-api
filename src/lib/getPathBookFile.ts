@@ -24,7 +24,7 @@ async function getIdBookEdition(
   bookPublisher: string
 ) {
   const response: Response = await axios.get(
-    `${host}/index.php?req=${bookTitle}%2B${bookPublisher}&curtab=e`
+    `${host}/index.php?req=${bookTitle}+${bookPublisher}&curtab=e`
   );
 
   const body: Body = response.data;
@@ -59,6 +59,8 @@ async function getMD5BookFile(host: string | undefined, editionId: string) {
   const json: JSON = response.data;
 
   const files: Object = Object.values(json)[0].files;
+
+  console.log(files);
 
   if (files) {
     const necessaryMD5 = Object.values(files)[0]["md5"];

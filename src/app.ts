@@ -5,10 +5,7 @@ dotenv.config();
 
 const port = process.env.PORT || 8080;
 
-const hostGoogleBooks = process.env.HOST_API_GOOGLE_BOOKS;
-const apiKeyGoogleBooks = process.env.API_KEY_GOOGLE_BOOKS;
-
-const hostLibgen = process.env.HOST_LIBGEN;
+const hostApi = process.env.HOST_API_FLIBUSTA;
 
 const app = express();
 
@@ -21,11 +18,7 @@ app.get("/api/books/:pageId", async (req: Request, res: Response) => {
   try {
     const pageId: number = +req.params.pageId;
 
-    const result: Object = await getAllBooks(
-      hostGoogleBooks,
-      apiKeyGoogleBooks,
-      pageId
-    );
+    const result = await getAllBooks(hostApi, pageId);
 
     res.json(result);
   } catch (error) {
@@ -33,7 +26,7 @@ app.get("/api/books/:pageId", async (req: Request, res: Response) => {
   }
 });
 
-app.get(
+/*app.get(
   "/api/books/search/:query/:pageId",
   async (req: Request, res: Response) => {
     try {
@@ -85,12 +78,14 @@ app.get(
         bookPublisher
       );
 
+      console.log(result);
+
       res.send(result);
     } catch (error) {
       console.error(error);
     }
   }
-);
+);*/
 
 app.listen(port, () => {
   console.log(`Service is running on http://localhost:${port}`);
