@@ -27,25 +27,20 @@ interface Books {
 export default async function getAllBooks(
   host: string | undefined,
   pageId: number
-): Promise<Books | null> {
-  try {
-    const response: Response = await axios.get(
-      `${host}/opds/new/${pageId !== 0 ? pageId - 1 : 0}/new`
-    );
+): Promise<Books> {
+  const currentPage = pageId;
 
-    const xml: XMLDocument = response.data;
+  const response: Response = await axios.get(
+    `${host}/opds/new/${pageId !== 0 ? pageId - 1 : 0}/new`
+  );
 
-    const body: Body = await parseStringPromise(xml);
+  const xml: XMLDocument = response.data;
 
-    const currentPage = pageId;
+  const body: Body = await parseStringPromise(xml);
 
-    const nextPage = checkNextPage(body.feed.link) ? currentPage + 1 : null;
+  const nextPage = checkNextPage(body.feed.link) ? currentPage + 1 : null;
 
-    const data: Data = convertEntryData(host, body.feed.entry);
+  const data: Data = convertEntryData(host, body.feed.entry);
 
-    return { currentPage: currentPage, data: data, nextPage: nextPage };
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
+  return { currentPage: currentPage, data: data, nextPage: nextPage };
 }

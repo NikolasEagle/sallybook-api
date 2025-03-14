@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+import request from "request";
+
 const port = process.env.PORT || 8080;
 
 const hostApi = process.env.HOST_API_FLIBUSTA;
@@ -16,7 +18,7 @@ app.get("/api/books/:pageId", async (req: Request, res: Response) => {
   try {
     const pageId: number = +req.params.pageId;
 
-    const result: Object | null = await getAllBooks(hostApi, pageId);
+    const result: Object = await getAllBooks(hostApi, pageId);
 
     res.json(result);
   } catch (error) {
@@ -32,7 +34,7 @@ app.get(
 
       const query: string = req.params.query;
 
-      const result: Object | null = await searchBooks(hostApi, query, pageId);
+      const result: Object = await searchBooks(hostApi, query, pageId);
 
       res.json(result);
     } catch (error) {
@@ -40,6 +42,11 @@ app.get(
     }
   }
 );
+
+app.get("/api/book/:fileId", async (req: Request, res: Response) => {
+  const { fileId } = req.params;
+  request.get(`${hostApi}/b/${fileId}/epub`).pipe(res);
+});
 
 app.listen(port, () => {
   console.log(`Service is running on http://localhost:${port}`);

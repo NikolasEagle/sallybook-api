@@ -13,63 +13,67 @@ export type Entries = {
   link: Files;
 }[];
 
-export type Data = {
-  id: string;
+export type Data =
+  | {
+      id: string;
 
-  addedDate: string;
+      addedDate: string;
 
-  title: string;
+      title: string;
 
-  authors: string[] | [];
+      authors: string[] | [];
 
-  categories: string[] | [];
+      categories: string[] | [];
 
-  description: string;
+      description: string;
 
-  cover: string | null;
+      cover: string | null;
 
-  bookFile: string | null;
-}[];
+      bookFile: string | null;
+    }[]
+  | [];
 
 export default function convertEntryData(
   host: string | undefined,
   entries: Entries
 ): Data {
-  const data = entries.map((entry) => {
-    const id = entry.id.join("");
+  const data = entries
+    ? entries.map((entry) => {
+        const id = entry.id.join("");
 
-    const addedDate = entry.updated.join("");
+        const addedDate = entry.updated.join("");
 
-    const title = entry.title.join("");
+        const title = entry.title.join("");
 
-    const authors = getAuthors(entry.author);
+        const authors = getAuthors(entry.author);
 
-    const categories = getCategories(entry.category);
+        const categories = getCategories(entry.category);
 
-    const description = getDescription(entry.content);
+        const description = getDescription(entry.content);
 
-    const cover = getFile(host, entry.link, "jpeg");
+        const cover = getFile(host, entry.link, "jpeg");
 
-    const bookFile = getFile(host, entry.link, "epub");
+        const bookFile = getFile(host, entry.link, "epub");
 
-    return {
-      id: id,
+        return {
+          id: id,
 
-      addedDate: addedDate,
+          addedDate: addedDate,
 
-      title: title,
+          title: title,
 
-      authors: authors,
+          authors: authors,
 
-      categories: categories,
+          categories: categories,
 
-      description: description,
+          description: description,
 
-      cover: cover,
+          cover: cover,
 
-      bookFile: bookFile,
-    };
-  });
+          bookFile: bookFile,
+        };
+      })
+    : [];
 
   return data;
 }

@@ -17,5 +17,11 @@ export default function getFile(
 
   const foundLink = files.find((file) => regExpType.test(file.$.type));
 
+  if (type === "epub") {
+    return foundLink
+      ? `/api/book/${foundLink.$.href.replace("/b/", "").replace("/epub", "")}`
+      : null;
+  }
+
   return foundLink ? `${host}${foundLink.$.href}` : null;
 }
