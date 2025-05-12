@@ -5,8 +5,6 @@ dotenv.config();
 
 import request from "request";
 
-const port = process.env.PORT || 8080;
-
 const hostApi = process.env.HOST_API_FLIBUSTA;
 
 const app = express();
@@ -48,6 +46,6 @@ app.get("/api/book/:fileId", async (req: Request, res: Response) => {
   request.get(`${hostApi}/b/${fileId}/epub`).pipe(res);
 });
 
-app.listen(port, () => {
-  console.log(`Service is running on http://localhost:${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Service is running on ${process.env.PORT}`);
 });
