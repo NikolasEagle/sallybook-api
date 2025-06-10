@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
@@ -7,10 +8,22 @@ import request from "request";
 
 const hostApi = process.env.HOST_API_FLIBUSTA;
 
+const corsOptions = {
+
+  origin: `http://${process.env.HOST}:${process.env.PORT}`,
+
+  credentials: true,
+
+  optionSuccessStatus: 200
+
+}
+
 const app = express();
 
 import getAllBooks from "./lib/getAllBooks.ts";
 import searchBooks from "./lib/searchBooks.ts";
+
+app.use(cors(corsOptions))
 
 app.get("/api/books/:pageId", async (req: Request, res: Response) => {
   try {
