@@ -46,6 +46,6 @@ app.get("/api/book/:fileId", async (req: Request, res: Response) => {
   request.get(`${hostApi}/b/${fileId}/epub`).pipe(res);
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Service is running on ${process.env.PORT}`);
+app.listen(process.env.SERVER_API_PORT, () => {
+  console.log(`Service is running on ${process.env.SERVER_API_PORT}`);
 });
